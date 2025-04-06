@@ -508,4 +508,37 @@ public class FoodDatabase {
             .filter(food -> username.equals(food.getOwner()))
             .collect(Collectors.toList());
     }
+
+    
+
+    // Search for foods that match multiple keywords (either all or any)
+    public List<Food> searchFoodsByMultipleKeywords(String[] keywords, boolean matchAll, String username) {
+        if (keywords == null || keywords.length == 0) {
+            return getFoodsVisibleToUser(username);
+        }
+        
+        return foods.stream()
+            .filter(food -> food.isVisibleToUser(username) && matchesMultipleKeywords(food, keywords, matchAll))
+            .collect(Collectors.toList());
+    }
+
+    private boolean matchesMultipleKeywords(Food food, String[] keywords, boolean matchAll) {
+        if (matchAll) {
+            // Food must match ALL keywords
+            for (String keyword : keywords) {
+                if (!food.matchesKeyword(keyword)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            // Food must match ANY keyword
+            for (String keyword : keywords) {
+                if (food.matchesKeyword(keyword)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

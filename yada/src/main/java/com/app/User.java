@@ -133,5 +133,88 @@ public class User {
     public String getUserName() {
         return this.UserName;
     }
+
+    // Add these methods to User.java
+    public int getHeight() {
+        return this.Height;
+    }
+
+    public int getWeight() {
+        return this.Weight;
+    }
+
+    public int getAge() {
+        return this.Age;
+    }
+
+    public String getGender() {
+        return this.Gender;
+    }
+
+    public String getActivityLevel() {
+        return this.ActivityLevel;
+    }
+
+    public void setHeight(int height) {
+        this.Height = height;
+    }
+
+    public void setWeight(int weight) {
+        this.Weight = weight;
+    }
+
+    public void setAge(int age) {
+        this.Age = age;
+    }
+
+    public void setActivityLevel(String activityLevel) {
+        this.ActivityLevel = activityLevel;
+    }
+
+    public boolean saveChangesToDatabase() {
+        // Similar to saveToDatabase() but handles updates for existing users
+        String dbPath = "userDatabase.json";
+        JSONParser parser = new JSONParser();
+        
+        try {
+            JSONArray userArray;
+            
+            // Check if file exists and isn't empty
+            if (!Files.exists(Paths.get(dbPath)) || Files.size(Paths.get(dbPath)) == 0) {
+                userArray = new JSONArray();
+            } else {
+                // Load existing users
+                try (FileReader reader = new FileReader(dbPath)) {
+                    userArray = (JSONArray) parser.parse(reader);
+                    
+                    // Look for existing user to update
+                    for (int i = 0; i < userArray.size(); i++) {
+                        JSONObject userJson = (JSONObject) userArray.get(i);
+                        if (userJson.get("username").equals(this.UserName)) {
+                            // Update user data
+                            userJson.put("gender", this.Gender);
+                            userJson.put("height", this.Height);
+                            userJson.put("weight", this.Weight);
+                            userJson.put("age", this.Age);
+                            userJson.put("activityLevel", this.ActivityLevel);
+                            
+                            // Write updated array back to file
+                            try (FileWriter file = new FileWriter(dbPath)) {
+                                file.write(userArray.toJSONString());
+                                file.flush();
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            return false; // User not found
+            
+        } catch (IOException | ParseException e) {
+            System.err.println("Error updating user in database: " + e.getMessage());
+            return false;
+        }
+    }
     
 }
